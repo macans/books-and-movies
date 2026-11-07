@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "Books & Movies",
+  "version": "0.3.0",
+  "minimum_chrome_version": "116",
+  "description": "One thoughtful recommendation at a time. Save what interests you and get a personal, in-depth reading or viewing guide.",
+  "permissions": [
+    "storage",
+    "sidePanel",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://book.douban.com/*",
+    "https://movie.douban.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Books & Movies",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "options_page": "panel.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://book.douban.com/*",
+        "https://movie.douban.com/*"
+      ],
+      "js": [
+        "lib/parser.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"
+  }
+}

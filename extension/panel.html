@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Books &amp; Movies</title><link rel="stylesheet" href="panel.css"></head>
+<body>
+<div class="shell">
+<header class="masthead"><a class="brand" href="#discover" aria-label="Books & Movies home"><span class="brand-mark" aria-hidden="true">b<span>&</span>m</span><span>Books <i>&</i> Movies<small>A LITTLE MORE YOUR KIND OF THING.</small></span></a><div class="header-actions"><button id="settings-button" class="icon-button" aria-label="Settings" title="Settings">⚙</button><button id="expand" class="icon-button" aria-label="Open in a tab" title="Open in a tab">↗</button></div></header>
+<nav aria-label="Main navigation"><button data-view="discover" class="active" aria-current="page">Discover</button><button data-view="library">My List <span id="saved-indicator" aria-hidden="true"></span></button><button data-view="deep">Deep Dive</button></nav>
+<main>
+<section id="setup" class="view" hidden>
+ <p class="eyebrow">A GOOD PLACE TO START</p><h1>Your own kind<br>of story.</h1><p class="lead">Connect your reading and viewing history for thoughtful, personal recommendations.</p>
+ <div class="setup-step"><span class="step-number">01</span><div><h2>Sign in on Douban</h2><p>Use your own account in the Douban tab. Your password and cookies never enter this extension.</p><p id="connection-state" role="status"></p><div class="setup-actions"><button id="connect-douban" class="primary">Connect Douban ↗</button><button id="check-douban" class="secondary" hidden>I’m signed in</button></div></div></div>
+ <div class="setup-step"><span class="step-number">02</span><div><h2>Make it personal</h2><p>Read your book and movie history in this Chrome profile. Completed and in-progress titles stay out of new recommendations.</p><label class="check"><input id="history-consent" type="checkbox">Use my titles, ratings, comments and tags from Douban to personalize recommendations locally.</label><p id="history-state" role="status"></p><div class="setup-actions"><button id="sync-history" class="primary" disabled>Use my history</button><button id="stop-history" class="secondary" hidden>Stop</button><button id="open-history" class="text-button" hidden>Open Douban history ↗</button></div></div></div>
+ <div class="setup-step"><span class="step-number">03</span><div><h2>One thoughtful pick at a time</h2><p>Choose Interested to keep a title or Skip to move on. Your choices stay on this device.</p><button id="finish-setup" class="primary">Explore without history</button></div></div>
+ <p class="small muted">No account with this app. No analytics. No background model calls. You can refresh or clear your local data in Settings.</p>
+</section>
+<section id="discover" class="view">
+ <div class="page-heading"><div><p class="eyebrow">ONE AT A TIME</p><h1>Something worth<br>your time.</h1></div><p class="lead">A thoughtful pick.<br>A little room for curiosity.</p></div>
+ <div class="discovery-toolbar"><div class="segmented" role="group" aria-label="Recommendation type"><button data-kind="book" class="active" aria-pressed="true">Books</button><button data-kind="movie" aria-pressed="false">Movies</button></div><span class="quiet-label">SELECTED FOR YOU</span></div>
+ <div id="recommendation" aria-live="polite" aria-busy="true"><div class="empty">Preparing your next pick…</div></div>
+ <p class="stay-note">Take your time. Your pick stays here until you choose.</p>
+</section>
+<section id="library" class="view" hidden>
+ <p class="eyebrow">KEEP THE GOOD POSSIBILITIES</p><h1>My List.</h1><p class="lead">Everything that caught your interest, ready when you are.</p>
+ <div class="library-toolbar"><div class="segmented" role="group" aria-label="Filter saved items"><button data-filter="all" class="active" aria-pressed="true">All</button><button data-filter="book" aria-pressed="false">Books</button><button data-filter="movie" aria-pressed="false">Movies</button></div><input id="library-search" type="search" placeholder="Find a saved title…" aria-label="Find a saved title"></div>
+ <div id="library-list"></div>
+</section>
+<section id="details" class="view" hidden><button id="back-library" class="back-link">← Back to My List</button><div id="detail-content"></div></section>
+<section id="deep" class="view" hidden>
+ <p class="eyebrow">BEFORE YOU COMMIT</p><h1>The full picture.</h1><p class="lead">Bring a title. Get a thoughtful guide to what it offers, and whether it’s for you.</p>
+ <form id="search-form"><label for="query">Title or Douban link</label><div class="search-row"><select id="search-kind" aria-label="Search type"><option value="book">Book</option><option value="movie">Movie</option></select><input id="query" placeholder="A title you’re curious about…" required autocomplete="off"><button class="primary" id="search-button">Explore <span aria-hidden="true">↗</span></button></div></form>
+ <div class="search-hint"><span>Chinese introductions · About 1,500 characters · No key spoilers</span><button id="capture" class="text-button">Use current Douban page</button></div>
+ <div id="search-results" aria-live="polite"></div><div id="deep-content" aria-live="polite"></div>
+</section>
+<section id="settings" class="view" hidden>
+ <p class="eyebrow">MAKE IT YOURS</p><h1>Settings.</h1>
+ <div class="settings-card"><h2>Your reading & viewing history</h2><p id="settings-connection">Connect your own Douban account to personalize your picks.</p><button class="secondary" data-view="setup">Manage Douban connection</button><details class="privacy-controls"><summary>Clear local data</summary><p>This removes this extension’s history, saved titles, skipped titles, connection and model settings. Your Douban account and browser login remain unchanged.</p><button id="clear-data" class="secondary">Clear this extension’s data</button></details></div>
+ <div class="settings-card"><h2>Optional model connection</h2><p>Your personal guides work without an API key. Connect a model for a richer interpretation when you choose “Generate model guide”.</p><p class="small">That action sends this title’s information and up to four relevant titles, ratings and comments to your chosen provider. Your key stays in this browser session.</p>
+ <label for="endpoint">Chat Completions endpoint (HTTPS)</label><input id="endpoint" type="url" placeholder="https://your-provider.example/v1/chat/completions"><label for="model-name">Model</label><input id="model-name" placeholder="Model supported by your provider"><label for="api-key">API key</label><input id="api-key" type="password" autocomplete="off" placeholder="Stored for this browser session"><label class="check"><input type="checkbox" id="model-consent">Enable this provider and allow the data described above to be sent when I request a model guide.</label><button id="save-model" class="primary">Save connection</button></div>
+ <p class="small muted">Your choices and reading preferences stay in this Chrome profile. Nothing is posted to Douban. Books &amp; Movies runs as an installed extension, with no local server.</p>
+</section>
+</main>
+<footer><span>Good stories. Better choices.</span><span>BOOKS &amp; MOVIES</span></footer>
+</div><div id="toast" role="status" hidden></div><script src="lib/parser.js"></script><script type="module" src="panel.js"></script>
+</body></html>

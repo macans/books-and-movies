@@ -1,0 +1,16 @@
+.tools/
+node_modules/
+dist/
+private/
+.local-data/
+*.log
+.DS_Store
+extension/data/bootstrap.json
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.zip
+*credentials*.json
+*auth-session*.json

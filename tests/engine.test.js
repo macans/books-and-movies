@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalize,mergeRecords,recommend,evaluate,sentiment,importBackup} from '../extension/lib/engine.js';
+const rec=(id,extra={})=>({kind:'book',id:String(id),title:`作品 ${id}`,tags:['科技产业'],status:'collect',rating:5,...extra});
+test('unrated does not invent a star rating or positive sentiment',()=>{const r=normalize(rec(1,{rating:null,comment:'记录一下'}));assert.equal(r.rating,null);assert.equal(sentiment(r).weight,0);});
+test('negative comment is marked as inference, not star rating',()=>{const r=rec(1,{rating:null,comment:'组织太乱，完全没有可读性'});assert.ok(sentiment(r).weight<0);assert.match(sentiment(r).source,/非星级/);});
+test('wishlist is weaker than a 5-star rating',()=>assert.ok(sentiment(rec(1,{status:'wish',rating:null})).weight<sentiment(rec(1)).weight));
+test('merges by type and ID; updated state replaces old status',()=>{const records=mergeRecords([rec(1),rec(1,{kind:'movie'})],[rec(1,{status:'wish',rating:null})]);assert.equal(records.length,2);assert.equal(records[0].status,'wish');assert.equal(records[0].rating,null);});
+test('recommend excludes completed/in-progress/hidden but includes wishes',()=>{const catalog=[1,2,3,4,5].map(id=>rec(id,{status:undefined}));const rows=[rec(1),rec(2,{status:'do'}),rec(3,{status:'wish'})];assert.deepEqual(recommend(catalog,rows,'book',{'book:4':'hide'}).map(x=>x.item.id).sort(),['3','5']);});
+test('book history never leaks into movie preference',()=>{const r=evaluate(rec(2,{kind:'movie'}),[rec(1)]);assert.equal(r.evidence.length,0);assert.equal(r.confidence,'低');});
+test('new users get low confidence, not fabricated personal reasons',()=>{const r=evaluate(rec(2),[]);assert.equal(r.confidence,'低');assert.match(r.verdict,/不足/);});
+test('negative evidence reduces match score',()=>{const pos=evaluate(rec(2),[rec(1)]),neg=evaluate(rec(2),[rec(1,{rating:1})]);assert.ok(pos.score>neg.score);assert.ok(neg.cautions.length);});
+test('invalid imports fail atomically and enforce account',()=>{assert.throws(()=>importBackup({version:1,account:'someone',records:[]},'me'));assert.throws(()=>importBackup({version:1,account:'me',records:[rec(1),rec(2,{rating:9})]},'me'));});
+test('canonical URL rejects imported link injection',()=>assert.equal(normalize(rec(1,{url:'javascript:alert(1)'})).url,'https://book.douban.com/subject/1/'));
+test('reject unknown media or identifiers',()=>{assert.throws(()=>normalize(rec('x')));assert.throws(()=>normalize(rec(1,{kind:'music'})));});
+test('malformed optional arrays cannot break ranking after import',()=>{const r=normalize(rec(1,{subjectTags:42,editorialTags:{},creators:null}));assert.deepEqual(r.subjectTags,[]);assert.doesNotThrow(()=>evaluate(r,[]));});
+test('refreshing a collection preserves previously fetched subject metadata',()=>{const old=rec(1,{meta:'作者 / 出版年',subjectTags:['传记'],creators:['作者甲'],summary:'简介'});const merged=mergeRecords([old],[rec(1,{rating:2,comment:'重新评价'})])[0];assert.equal(merged.rating,2);assert.equal(merged.comment,'重新评价');assert.equal(merged.meta,'作者 / 出版年');assert.deepEqual(merged.subjectTags,['传记']);});
+test('bundled artwork survives a history thumbnail overlay for the same edition',()=>{const catalog=rec(1,{cover:'artwork/book-1.jpg',status:undefined}),history=rec(1,{status:'wish',cover:'https://img3.doubanio.com/view/subject/s/public/sample.jpg'});assert.equal(mergeRecords([catalog],[history])[0].cover,'artwork/book-1.jpg');assert.equal(recommend([catalog],[history],'book')[0].item.cover,'artwork/book-1.jpg');});
